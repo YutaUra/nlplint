@@ -9,8 +9,10 @@ specifiers:
   '@typescript-eslint/parser': ^5.45.0
   '@vscode/test-electron': ^2.2.0
   eslint: ^8.28.0
+  eslint-config-prettier: ^8.5.0
   glob: ^8.0.3
   mocha: ^10.1.0
+  prettier: ^2.8.1
   ts-loader: ^9.4.1
   typescript: ^4.9.3
   webpack: ^5.75.0
@@ -25,8 +27,10 @@ devDependencies:
   '@typescript-eslint/parser': 5.46.0_ha6vam6werchizxrnqvarmz2zu
   '@vscode/test-electron': 2.2.1
   eslint: 8.29.0
+  eslint-config-prettier: 8.5.0_eslint@8.29.0
   glob: 8.0.3
   mocha: 10.1.0
+  prettier: 2.8.1
   ts-loader: 9.4.2_3fkjkrd3audxnith3e7fo4fnxi
   typescript: 4.9.4
   webpack: 5.75.0_webpack-cli@5.0.1
@@ -837,6 +841,15 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  /eslint-config-prettier/8.5.0_eslint@8.29.0:
+    resolution: {integrity: sha512-obmWKLUNCnhtQRKc+tmnYuQl0pFU1ibYJQ5BGhTVB08bHe9wC8qUeG7c08dj9XX+AuPj1YSGSQIHl1pnDHZR0Q==}
+    hasBin: true
+    peerDependencies:
+      eslint: '>=7.0.0'
+    dependencies:
+      eslint: 8.29.0
+    dev: true
+
   /eslint-scope/5.1.1:
     resolution: {integrity: sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw==}
     engines: {node: '>=8.0.0'}
@@ -1605,6 +1618,12 @@ packages:
   /prelude-ls/1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
+    dev: true
+
+  /prettier/2.8.1:
+    resolution: {integrity: sha512-lqGoSJBQNJidqCHE80vqZJHWHRFoNYsSpP9AjFhlhi9ODCJA541svILes/+/1GM3VaL/abZi7cpFzOpdR9UPKg==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
     dev: true
 
   /process-nextick-args/2.0.1:
