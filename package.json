@@ -3,6 +3,7 @@
   "displayName": "nlplint",
   "description": "Using natural language processing (NLP) to Lint code.",
   "version": "0.0.1",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.74.0"
   },
