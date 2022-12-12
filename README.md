@@ -37,6 +37,10 @@ https://github.com/YutaUra/nlplint/issues
 
 ## Release Notes
 
+### 0.0.2
+
+Add README
+
 ### 0.0.1
 
 First release
