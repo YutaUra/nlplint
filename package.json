@@ -54,6 +54,7 @@
       }
     }
   },
+  "publisher": "YutaUra",
   "scripts": {
     "vscode:prepublish": "pnpm run package",
     "compile": "webpack",
