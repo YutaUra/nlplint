@@ -2,7 +2,7 @@
   "name": "nlplint",
   "displayName": "nlplint",
   "description": "Using natural language processing (NLP) to Lint code.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "engines": {
     "vscode": "^1.74.0"
@@ -20,11 +20,11 @@
     "commands": [
       {
         "command": "nlplint.nlplint",
-        "title": "Linting with NLP"
+        "title": "nlplint: Lint"
       },
       {
         "command": "nlplint.setAccessToken",
-        "title": "Set OpenAI Access Token"
+        "title": "nlplint: Set OpenAI Access Token"
       }
     ],
     "configuration": {

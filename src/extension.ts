@@ -5,28 +5,10 @@ import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai'
 import { ConfigurationKey, EXTENSION_NAME, SecretsKey } from './types'
 import { createTelemetry } from './telemetry'
 import * as format from 'string-format'
+import { getPrompt } from './getPrompt'
 
 const REGEXP =
   /score: *(?<score>[1-9]+\d*(?:\.\d*)?)\ndescription: *(?<description>(?:.|\n)*)/
-
-const PROMPT_FORMAT = `次の評価観点において以下のコードを評価しなさい。その際に次の評価用フォーマットに従うこと。
-
-\`\`\`\`output
-score: <float: 0.0 to 100.0>
-description: <string: Detailed reasons why such a score is obtained, in {preferredLanguage}.>
-\`\`\`\`
-
-評価観点は次の通りです。
-1. コードがSRP原則に従っているかどうか
-
-評価するコードは次の通りです。
-
-\`\`\`\`code
-{code}
-\`\`\`\`
-
-Answer:
-\`\`\`\`output`
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
@@ -73,7 +55,8 @@ export function activate(context: vscode.ExtensionContext) {
           const preferredLanguage =
             conf.get(ConfigurationKey.preferredLanguage) ?? vscode.env.language
 
-          const prompt = format(PROMPT_FORMAT, {
+          const promptFormat = await getPrompt()
+          const prompt = format(promptFormat, {
             code: text,
             preferredLanguage,
           })
@@ -115,7 +98,7 @@ export function activate(context: vscode.ExtensionContext) {
                 sourceCode: text,
                 parameters,
                 errorMessage: `Invalid result. result is ${result}`,
-                promptFormat: PROMPT_FORMAT,
+                promptFormat,
               })
               vscode.window.showErrorMessage(
                 "I'm sorry, but the output did not match the expected format, so I was unable to process it correctly. I will output the obtained output as it is.",
@@ -148,7 +131,7 @@ export function activate(context: vscode.ExtensionContext) {
               isSuccess: true,
               resultScore: score,
               resultDescription: description,
-              promptFormat: PROMPT_FORMAT,
+              promptFormat,
             })
           } catch (err) {
             if (!axios.isAxiosError(err)) {
@@ -160,7 +143,7 @@ export function activate(context: vscode.ExtensionContext) {
                   sourceCodeLanguage: document.languageId,
                   isSuccess: false,
                   errorMessage: err.message,
-                  promptFormat: PROMPT_FORMAT,
+                  promptFormat,
                 })
                 vscode.window.showErrorMessage(err.message)
               } else {
@@ -171,7 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
                   sourceCodeLanguage: document.languageId,
                   isSuccess: false,
                   errorMessage: String(err),
-                  promptFormat: PROMPT_FORMAT,
+                  promptFormat,
                 })
                 vscode.window.showErrorMessage('Unknown error occurred.')
               }
@@ -184,7 +167,7 @@ export function activate(context: vscode.ExtensionContext) {
                 sourceCodeLanguage: document.languageId,
                 isSuccess: false,
                 errorMessage,
-                promptFormat: PROMPT_FORMAT,
+                promptFormat,
               })
               vscode.window.showErrorMessage(errorMessage)
             }
