@@ -11,16 +11,47 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:nlplint.helloWorld"
+    "onCommand:nlplint.helloWorld",
+    "onCommand:nlplint.setAccessToken"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "nlplint.helloWorld",
-        "title": "Hello World"
+        "command": "nlplint.nlplint",
+        "title": "Linting with NLP"
+      },
+      {
+        "command": "nlplint.setAccessToken",
+        "title": "Set OpenAI Access Token"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "nlplint",
+      "properties": {
+        "nlplint.openaiOrganizationId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "OpenAI Organization ID"
+        },
+        "nlplint.telemetry": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable telemetry to help improve the extension."
+        },
+        "nlplint.preferredLanguage": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Preferred language for the completion suggestions.The language specification can be used as is for the prompt, so it can take a relatively free form. For example: ja, japanese, 日本語"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
@@ -37,6 +68,7 @@
     "@types/glob": "^8.0.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
+    "@types/string-format": "^2.0.0",
     "@types/vscode": "^1.74.0",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
@@ -50,5 +82,10 @@
     "typescript": "^4.9.3",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.2.1",
+    "openai": "^3.1.0",
+    "string-format": "^2.0.0"
   }
 }
