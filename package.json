@@ -15,6 +15,7 @@
     "onCommand:nlplint.setAccessToken"
   ],
   "main": "./dist/extension.js",
+  "repository": "https://github.com/YutaUra/nlplint.git",
   "contributes": {
     "commands": [
       {
