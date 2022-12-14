@@ -19,6 +19,8 @@ export type Telemetry = {
   sourceCodeLanguage: string
   parameters: CreateCompletionRequest
   promptFormat: string
+  promptDescription: string
+  extensionVersion: string
 } & (
   | {
       isSuccess: true

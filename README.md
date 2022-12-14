@@ -40,6 +40,10 @@ https://github.com/YutaUra/nlplint/issues
 
 ## Release Notes
 
+### 0.0.4
+
+Just a small correction
+
 ### 0.0.3
 
 Fixed to use random prompts 

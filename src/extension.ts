@@ -3,7 +3,7 @@ import * as vscode from 'vscode'
 import axios from 'axios'
 import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai'
 import { ConfigurationKey, EXTENSION_NAME, SecretsKey } from './types'
-import { createTelemetry } from './telemetry'
+import { createTelemetry, Telemetry } from './telemetry'
 import * as format from 'string-format'
 import { getPrompt } from './getPrompt'
 
@@ -11,6 +11,8 @@ const REGEXP =
   /score: *(?<score>[1-9]+\d*(?:\.\d*)?)\ndescription: *(?<description>(?:.|\n)*)/
 
 export function activate(context: vscode.ExtensionContext) {
+  const VERSION = vscode.extensions.getExtension(EXTENSION_NAME)?.packageJSON
+    .version as string
   context.subscriptions.push(
     vscode.commands.registerCommand(`${EXTENSION_NAME}.nlplint`, async () => {
       await vscode.window.withProgress(
@@ -55,7 +57,8 @@ export function activate(context: vscode.ExtensionContext) {
           const preferredLanguage =
             conf.get(ConfigurationKey.preferredLanguage) ?? vscode.env.language
 
-          const promptFormat = await getPrompt()
+          const { prompt: promptFormat, description: promptDescription } =
+            await getPrompt()
           const prompt = format(promptFormat, {
             code: text,
             preferredLanguage,
@@ -68,6 +71,19 @@ export function activate(context: vscode.ExtensionContext) {
             max_tokens: 256,
             stop: '````\n',
             top_p: 1,
+          }
+
+          const telemetry: Omit<
+            Telemetry,
+            'errorMessage' | 'isSuccess' | 'resultScore' | 'resultDescription'
+          > = {
+            openAiOrganizationId,
+            sourceCodeLanguage: document.languageId,
+            sourceCode: text,
+            parameters,
+            promptFormat,
+            promptDescription,
+            extensionVersion: VERSION,
           }
           try {
             const response = await openai.createCompletion(parameters, {
@@ -92,13 +108,9 @@ export function activate(context: vscode.ExtensionContext) {
                 viewColumn: vscode.ViewColumn.Beside,
               })
               createTelemetry({
-                openAiOrganizationId,
+                ...telemetry,
                 isSuccess: false,
-                sourceCodeLanguage: document.languageId,
-                sourceCode: text,
-                parameters,
                 errorMessage: `Invalid result. result is ${result}`,
-                promptFormat,
               })
               vscode.window.showErrorMessage(
                 "I'm sorry, but the output did not match the expected format, so I was unable to process it correctly. I will output the obtained output as it is.",
@@ -124,50 +136,34 @@ export function activate(context: vscode.ExtensionContext) {
             })
 
             createTelemetry({
-              openAiOrganizationId,
-              parameters,
-              sourceCode: text,
-              sourceCodeLanguage: document.languageId,
+              ...telemetry,
               isSuccess: true,
               resultScore: score,
               resultDescription: description,
-              promptFormat,
             })
           } catch (err) {
             if (!axios.isAxiosError(err)) {
               if (err instanceof Error) {
                 createTelemetry({
-                  openAiOrganizationId,
-                  parameters,
-                  sourceCode: text,
-                  sourceCodeLanguage: document.languageId,
+                  ...telemetry,
                   isSuccess: false,
                   errorMessage: err.message,
-                  promptFormat,
                 })
                 vscode.window.showErrorMessage(err.message)
               } else {
                 createTelemetry({
-                  openAiOrganizationId,
-                  parameters,
-                  sourceCode: text,
-                  sourceCodeLanguage: document.languageId,
                   isSuccess: false,
                   errorMessage: String(err),
-                  promptFormat,
+                  ...telemetry,
                 })
                 vscode.window.showErrorMessage('Unknown error occurred.')
               }
             } else {
               const errorMessage = err.response?.data?.error?.message
               createTelemetry({
-                openAiOrganizationId,
-                parameters,
-                sourceCode: text,
-                sourceCodeLanguage: document.languageId,
                 isSuccess: false,
                 errorMessage,
-                promptFormat,
+                ...telemetry,
               })
               vscode.window.showErrorMessage(errorMessage)
             }
