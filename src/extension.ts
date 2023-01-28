@@ -4,11 +4,10 @@ import axios from 'axios'
 import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai'
 import { ConfigurationKey, EXTENSION_NAME, SecretsKey } from './types'
 import { createTelemetry, Telemetry } from './telemetry'
+import { isTelemetryEnabled } from './isTelemetryEnabled'
 import * as format from 'string-format'
-import { getPrompt } from './getPrompt'
-
-const REGEXP =
-  /score: *(?<score>[1-9]+\d*(?:\.\d*)?)\ndescription: *(?<description>(?:.|\n)*)/
+import { getPrompt, OUTPUT_FORMAT_REGEXP } from './getPrompt'
+import { hash } from './lib/hash'
 
 export function activate(context: vscode.ExtensionContext) {
   const VERSION = vscode.extensions.getExtension(EXTENSION_NAME)?.packageJSON
@@ -66,11 +65,10 @@ export function activate(context: vscode.ExtensionContext) {
 
           const parameters: CreateCompletionRequest = {
             model: 'code-davinci-002',
-            temperature: 0,
+            temperature: 0.9,
             prompt,
             max_tokens: 256,
             stop: '````\n',
-            top_p: 1,
           }
 
           const telemetry: Omit<
@@ -84,6 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
             promptFormat,
             promptDescription,
             extensionVersion: VERSION,
+            hashedMachineId: hash(vscode.env.machineId),
           }
           try {
             const response = await openai.createCompletion(parameters, {
@@ -98,7 +97,7 @@ export function activate(context: vscode.ExtensionContext) {
               return
             }
 
-            const match = result.match(REGEXP)
+            const match = result.match(OUTPUT_FORMAT_REGEXP)
             if (!match) {
               const doc = await vscode.workspace.openTextDocument({
                 content: result,
@@ -107,11 +106,13 @@ export function activate(context: vscode.ExtensionContext) {
               vscode.window.showTextDocument(doc, {
                 viewColumn: vscode.ViewColumn.Beside,
               })
-              createTelemetry({
-                ...telemetry,
-                isSuccess: false,
-                errorMessage: `Invalid result. result is ${result}`,
-              })
+              if (isTelemetryEnabled()) {
+                createTelemetry({
+                  ...telemetry,
+                  isSuccess: false,
+                  errorMessage: `Invalid result. result is ${result}`,
+                })
+              }
               vscode.window.showErrorMessage(
                 "I'm sorry, but the output did not match the expected format, so I was unable to process it correctly. I will output the obtained output as it is.",
               )
@@ -135,36 +136,44 @@ export function activate(context: vscode.ExtensionContext) {
               viewColumn: vscode.ViewColumn.Beside,
             })
 
-            createTelemetry({
-              ...telemetry,
-              isSuccess: true,
-              resultScore: score,
-              resultDescription: description,
-            })
+            if (isTelemetryEnabled()) {
+              createTelemetry({
+                ...telemetry,
+                isSuccess: true,
+                resultScore: score,
+                resultDescription: description,
+              })
+            }
           } catch (err) {
             if (!axios.isAxiosError(err)) {
               if (err instanceof Error) {
-                createTelemetry({
-                  ...telemetry,
-                  isSuccess: false,
-                  errorMessage: err.message,
-                })
+                if (isTelemetryEnabled()) {
+                  createTelemetry({
+                    ...telemetry,
+                    isSuccess: false,
+                    errorMessage: err.message,
+                  })
+                }
                 vscode.window.showErrorMessage(err.message)
               } else {
-                createTelemetry({
-                  isSuccess: false,
-                  errorMessage: String(err),
-                  ...telemetry,
-                })
+                if (isTelemetryEnabled()) {
+                  createTelemetry({
+                    isSuccess: false,
+                    errorMessage: String(err),
+                    ...telemetry,
+                  })
+                }
                 vscode.window.showErrorMessage('Unknown error occurred.')
               }
             } else {
               const errorMessage = err.response?.data?.error?.message
-              createTelemetry({
-                isSuccess: false,
-                errorMessage,
-                ...telemetry,
-              })
+              if (isTelemetryEnabled()) {
+                createTelemetry({
+                  isSuccess: false,
+                  errorMessage,
+                  ...telemetry,
+                })
+              }
               vscode.window.showErrorMessage(errorMessage)
             }
           }

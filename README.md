@@ -40,6 +40,10 @@ https://github.com/YutaUra/nlplint/issues
 
 ## Release Notes
 
+### 0.0.5
+
+Parameters have been adjusted
+
 ### 0.0.4
 
 Just a small correction

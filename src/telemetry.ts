@@ -1,17 +1,6 @@
 import axios from 'axios'
 import { CreateCompletionRequest } from 'openai'
-import * as vscode from 'vscode'
 import { hash } from './lib/hash'
-import { ConfigurationKey, EXTENSION_NAME } from './types'
-
-const isTelemetryEnabled = () => {
-  return (
-    vscode.env.isTelemetryEnabled &&
-    vscode.workspace
-      .getConfiguration(EXTENSION_NAME)
-      .get(ConfigurationKey.telemetry) === true
-  )
-}
 
 export type Telemetry = {
   openAiOrganizationId?: string
@@ -21,6 +10,7 @@ export type Telemetry = {
   promptFormat: string
   promptDescription: string
   extensionVersion: string
+  hashedMachineId: string
 } & (
   | {
       isSuccess: true
@@ -40,10 +30,6 @@ export const createTelemetry = async ({
   openAiOrganizationId,
   ...telemetry
 }: Telemetry) => {
-  if (!isTelemetryEnabled()) {
-    return
-  }
-
   const hashedOpenAiOrganizationId = openAiOrganizationId
     ? hash(openAiOrganizationId)
     : null
@@ -52,7 +38,6 @@ export const createTelemetry = async ({
     await axios.post(TELEMETRY_ENDPOINT, {
       ...telemetry,
       hashedOpenAiOrganizationId,
-      hashedMachineId: hash(vscode.env.machineId),
     })
   } catch (err) {
     console.error(err)

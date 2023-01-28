@@ -9,3 +9,6 @@ export const getPrompt = async () => {
   )
   return data
 }
+
+export const OUTPUT_FORMAT_REGEXP =
+  /\s*score: *(?<score>(?:[1-9]+\d*(?:\.\d*)?|0(?:\.0)?))\n\s*description: *(?<description>(?:.|\n)*)/
