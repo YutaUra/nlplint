@@ -3,8 +3,6 @@ import * as vscode from 'vscode'
 import axios from 'axios'
 import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai'
 import { ConfigurationKey, EXTENSION_NAME, SecretsKey } from './types'
-import { createTelemetry, Telemetry } from './telemetry'
-import { isTelemetryEnabled } from './isTelemetryEnabled'
 import * as format from 'string-format'
 import { getPrompt, OUTPUT_FORMAT_REGEXP } from './getPrompt'
 import { hash } from './lib/hash'
@@ -71,19 +69,6 @@ export function activate(context: vscode.ExtensionContext) {
             stop: '````\n',
           }
 
-          const telemetry: Omit<
-            Telemetry,
-            'errorMessage' | 'isSuccess' | 'resultScore' | 'resultDescription'
-          > = {
-            openAiOrganizationId,
-            sourceCodeLanguage: document.languageId,
-            sourceCode: text,
-            parameters,
-            promptFormat,
-            promptDescription,
-            extensionVersion: VERSION,
-            hashedMachineId: hash(vscode.env.machineId),
-          }
           try {
             const response = await openai.createCompletion(parameters, {
               cancelToken: cancelToken.token,
@@ -106,13 +91,6 @@ export function activate(context: vscode.ExtensionContext) {
               vscode.window.showTextDocument(doc, {
                 viewColumn: vscode.ViewColumn.Beside,
               })
-              if (isTelemetryEnabled()) {
-                createTelemetry({
-                  ...telemetry,
-                  isSuccess: false,
-                  errorMessage: `Invalid result. result is ${result}`,
-                })
-              }
               vscode.window.showErrorMessage(
                 "I'm sorry, but the output did not match the expected format, so I was unable to process it correctly. I will output the obtained output as it is.",
               )
@@ -135,45 +113,15 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showTextDocument(doc, {
               viewColumn: vscode.ViewColumn.Beside,
             })
-
-            if (isTelemetryEnabled()) {
-              createTelemetry({
-                ...telemetry,
-                isSuccess: true,
-                resultScore: score,
-                resultDescription: description,
-              })
-            }
           } catch (err) {
             if (!axios.isAxiosError(err)) {
               if (err instanceof Error) {
-                if (isTelemetryEnabled()) {
-                  createTelemetry({
-                    ...telemetry,
-                    isSuccess: false,
-                    errorMessage: err.message,
-                  })
-                }
                 vscode.window.showErrorMessage(err.message)
               } else {
-                if (isTelemetryEnabled()) {
-                  createTelemetry({
-                    isSuccess: false,
-                    errorMessage: String(err),
-                    ...telemetry,
-                  })
-                }
                 vscode.window.showErrorMessage('Unknown error occurred.')
               }
             } else {
               const errorMessage = err.response?.data?.error?.message
-              if (isTelemetryEnabled()) {
-                createTelemetry({
-                  isSuccess: false,
-                  errorMessage,
-                  ...telemetry,
-                })
-              }
               vscode.window.showErrorMessage(errorMessage)
             }
           }

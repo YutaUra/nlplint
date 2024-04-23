@@ -2,7 +2,7 @@
   "name": "nlplint",
   "displayName": "nlplint",
   "description": "Using natural language processing (NLP) to Lint code.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "license": "MIT",
   "engines": {
     "vscode": "^1.74.0"
@@ -40,8 +40,9 @@
         },
         "nlplint.telemetry": {
           "type": "boolean",
-          "default": true,
-          "description": "Enable telemetry to help improve the extension."
+          "default": false,
+          "description": "Enable telemetry to help improve the extension.",
+          "deprecationMessage": "This setting is deprecated. Telemetry is not collected."
         },
         "nlplint.preferredLanguage": {
           "type": [

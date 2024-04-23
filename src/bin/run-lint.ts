@@ -1,7 +1,6 @@
 import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai'
 import { OUTPUT_FORMAT_REGEXP } from '../getPrompt'
 import * as format from 'string-format'
-import { Telemetry, createTelemetry } from '../telemetry'
 import axios from 'axios'
 import { config } from 'dotenv'
 import { readFile, writeFile } from 'node:fs/promises'
@@ -59,19 +58,6 @@ const runCompletion = async (
     stop: '````\n',
   }
 
-  const telemetry: Omit<
-    Telemetry,
-    'errorMessage' | 'isSuccess' | 'resultScore' | 'resultDescription'
-  > = {
-    sourceCodeLanguage: 'javascript',
-    sourceCode: text,
-    parameters,
-    promptFormat,
-    promptDescription,
-    extensionVersion: 'test',
-    hashedMachineId: HASHED_MACHINE_ID,
-  }
-
   try {
     const response = await openai.createCompletion(parameters, {
       timeout: 1000 * 60 * 1,
@@ -89,11 +75,6 @@ const runCompletion = async (
 
     const match = result.match(OUTPUT_FORMAT_REGEXP)
     if (!match) {
-      await createTelemetry({
-        ...telemetry,
-        isSuccess: false,
-        errorMessage: `Invalid result. result is \n"""\n${result}\n"""`,
-      })
       showErrorMessage(`Invalid result. result is \n"""\n${result}\n"""`)
       return {
         success: false,
@@ -107,51 +88,24 @@ const runCompletion = async (
 
     if (Number.isNaN(score)) {
       showErrorMessage(`Invalid score ${score}`)
-      await createTelemetry({
-        ...telemetry,
-        isSuccess: false,
-        errorMessage: `Invalid score ${score}`,
-      })
       return {
         success: false,
         error: `Invalid score ${score}`,
       }
     }
-
-    await createTelemetry({
-      ...telemetry,
-      isSuccess: true,
-      resultScore: score,
-      resultDescription: description,
-    })
     return { success: true, score }
   } catch (err) {
     if (!axios.isAxiosError(err)) {
       if (err instanceof Error) {
-        await createTelemetry({
-          ...telemetry,
-          isSuccess: false,
-          errorMessage: err.message,
-        })
         showErrorMessage(err.message)
         return { success: false, error: err.message }
       } else {
-        await createTelemetry({
-          isSuccess: false,
-          errorMessage: String(err),
-          ...telemetry,
-        })
         showErrorMessage(String(err))
         return { success: false, error: String(err) }
       }
     } else {
       const errorMessage =
         err.response?.data?.error?.message ?? "Unknown OpenAI's error"
-      await createTelemetry({
-        isSuccess: false,
-        errorMessage,
-        ...telemetry,
-      })
       showErrorMessage(errorMessage)
       return { success: false, error: errorMessage }
     }

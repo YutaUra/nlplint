@@ -26,10 +26,8 @@ At this time, there is a free extension available, but please check the OpenAI p
 
 ## Extension Settings
 
-
-* `nlplint.openaiOrganizationId`: OpenAI Organization ID. This is optional.
-* `nlplint.preferredLanguage`: Language used by the natural language processing model to explain
-* `nlplint.telemetry`: Enable Telemetry. Note: Data will be used for research purposes. Please keep it turned on.
+- `nlplint.openaiOrganizationId`: OpenAI Organization ID. This is optional.
+- `nlplint.preferredLanguage`: Language used by the natural language processing model to explain
 
 ## Known Issues
 
@@ -39,6 +37,10 @@ If you have any problems, please feel free to submit an issue.
 https://github.com/YutaUra/nlplint/issues
 
 ## Release Notes
+
+### 0.0.6
+
+telemetry omitted
 
 ### 0.0.5
 
@@ -50,7 +52,7 @@ Just a small correction
 
 ### 0.0.3
 
-Fixed to use random prompts 
+Fixed to use random prompts
 
 ### 0.0.2
 
@@ -61,6 +63,7 @@ Add README
 First release
 
 The following features will be released
+
 - Allow users to get answers in their preferred language
 - Present scores in SRP principles
 
@@ -68,4 +71,4 @@ The following features will be released
 
 ## For more information
 
-* [GitHub Repository](https://github.com/YutaUra/nlplint)
+- [GitHub Repository](https://github.com/YutaUra/nlplint)

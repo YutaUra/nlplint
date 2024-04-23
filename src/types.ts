@@ -4,7 +4,6 @@ export const enum SecretsKey {
 
 export const enum ConfigurationKey {
   openaiOrganizationId = 'openaiOrganizationId',
-  telemetry = 'telemetry',
   preferredLanguage = 'preferredLanguage',
 }
 
